@@ -1,0 +1,16 @@
+{
+    "name": "recognize/recognize-dwhapi-bundle",
+    "description": "An IPA connector",
+    "authors": [
+        {
+            "name": "Falco IJben",
+            "email": "f.ijben@recognize.nl"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Recognize\\RecognizeDWHAPIBundle\\": "config/"
+        }
+    },
+    "require": {}
+}
