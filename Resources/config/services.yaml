@@ -1,0 +1,4 @@
+services:
+    Recognize\DwhApplication\Security\DwhUserProvider:
+        arguments:
+            $encryptedToken: '%recognize.dwh_application.encrypted_token%'
