@@ -1,16 +1,27 @@
 {
-    "name": "recognize/recognize-dwhapi-bundle",
+    "name": "recognize/dwh-application-symfony-bundle",
     "description": "An IPA connector",
     "authors": [
         {
             "name": "Falco IJben",
             "email": "f.ijben@recognize.nl"
+        },
+        {
+            "name": "Bart Wesselink",
+            "email": "b.wesselink@recognize.nl"
         }
     ],
     "autoload": {
         "psr-4": {
-            "Recognize\\RecognizeDWHAPIBundle\\": "config/"
+            "Recognize\\DwhApplication\\": ""
         }
     },
-    "require": {}
+    "require": {
+        "php": "^7.1.0",
+        "symfony/security-bundle": "^4.0",
+        "doctrine/orm": "^2.5.0",
+        "symfony/framework-bundle": "^4.0",
+        "jms/serializer": "2.3|^3.0",
+        "erasys/openapi-php": "^2.1"
+    }
 }

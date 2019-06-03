@@ -1,0 +1,9 @@
+services:
+    Recognize\DwhApplication\Security\DwhUserProvider:
+        arguments:
+            $encryptedToken: '%recognize.dwh_application.encrypted_token%'
+
+    Recognize\DwhApplication\Service\DocumentationService:
+        autowire: true
+        arguments:
+            $specificationVersion: '%recognize.dwh_application.specification_version%'
