@@ -24,9 +24,10 @@ class DwhApplicationExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $container->setParameter('recognize.dwh_application.path', $config['path']);
         $container->setParameter('recognize.dwh_application.encryption', $config['encryption']);
         $container->setParameter('recognize.dwh_application.encrypted_token', $config['encrypted_token']);
+        $container->setParameter('recognize.dwh_application.protocol_version', $config['protocol_version']);
+        $container->setParameter('recognize.dwh_application.specification_version', $config['specification_version']);
 
         $loader = new YamlFileLoader(
             $container,

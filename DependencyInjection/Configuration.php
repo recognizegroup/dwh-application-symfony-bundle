@@ -20,9 +20,10 @@ class Configuration implements ConfigurationInterface
 
         $treeBuilder->getRootNode()
             ->children()
-            ->scalarNode('path')->defaultValue('/api/dwh')->end()
-            ->enumNode('encryption')->values(['bcrypt'])->end()
-            ->scalarNode('encrypted_token')->isRequired()->end()
+                ->enumNode('encryption')->values(['bcrypt'])->end()
+                ->scalarNode('encrypted_token')->isRequired()->end()
+                ->scalarNode('protocol_version')->isRequired()->end()
+                ->scalarNode('specification_version')->isRequired()->end()
             ->end()
         ;
 

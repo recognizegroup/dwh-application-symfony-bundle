@@ -18,7 +18,9 @@ Firewall for the DWH-bridge:
 firewalls:
     recognize_dhw:
         pattern: ^/api/dwh
-        http_basic: ~
+        http_basic:
+            realm: Recognize DWH
+            provider: dwhsecurity
         anonymous: false
         stateless: true
 ```
