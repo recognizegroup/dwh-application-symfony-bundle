@@ -7,3 +7,13 @@ services:
         autowire: true
         arguments:
             $specificationVersion: '%recognize.dwh_application.specification_version%'
+
+    Recognize\DwhApplication\Service\ValidationService:
+        autowire: true
+        arguments:
+            $loaders: !tagged recognize.dwh_loader
+
+    Recognize\DwhApplication\Command\ValidateCommand:
+        autowire: true
+        tags:
+            - console.command

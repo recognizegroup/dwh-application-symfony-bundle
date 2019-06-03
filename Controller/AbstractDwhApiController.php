@@ -148,4 +148,12 @@ abstract class AbstractDwhApiController extends AbstractController
 
         return $response;
     }
+
+    /**
+     * @return array|EntityLoaderInterface[]
+     */
+    public function getEntityTypes()
+    {
+        return $this->entityTypes;
+    }
 }
