@@ -10,8 +10,36 @@ namespace Recognize\DwhApplication\Schema;
  */
 class EntityMapping
 {
+    /** @var string */
+    private $class;
+
     /** @var array|FieldMapping[] */
     private $fields = [];
+
+    /**
+     * EntityMapping constructor.
+     * @param string $class
+     */
+    public function __construct(string $class)
+    {
+        $this->class = $class;
+    }
+
+    /**
+     * @return string
+     */
+    public function getClass(): string
+    {
+        return $this->class;
+    }
+
+    /**
+     * @param string $class
+     */
+    public function setClass(string $class): void
+    {
+        $this->class = $class;
+    }
 
     /**
      * @param FieldMapping $fieldMapping
