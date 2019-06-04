@@ -21,7 +21,7 @@
         "symfony/security-bundle": "^4.0",
         "doctrine/orm": "^2.5.0",
         "symfony/framework-bundle": "^4.0",
-        "jms/serializer": "2.3|^3.0",
-        "erasys/openapi-php": "^2.1"
+        "erasys/openapi-php": "^2.1",
+        "symfony/serializer": "^4.0"
     }
 }
