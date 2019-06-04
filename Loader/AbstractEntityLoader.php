@@ -122,42 +122,63 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
 
         /** @var FieldMapping $field */
         foreach ($mapping->getFields() as $field) {
-            $name = $field->getName();
             $serializedName = $field->getSerializedName();
-            $type = $field->getType();
 
-            if (!$this->propertyAccessor->isReadable($entity, $name)) {
-                throw new \RuntimeException(sprintf('Field with name %s is not readable on entity %s', $name, get_class($entity)));
-            }
-
-            $value = $this->propertyAccessor->getValue($entity, $name);
-
-            if (in_array($type, [FieldMapping::TYPE_ENTITY, FieldMapping::TYPE_ARRAY])) {
-                $mapping = $field->getEntryMapping();
-
-                if (!$mapping instanceof EntityMapping) {
-                    throw new LogicException(sprintf('Invalid entity mapping for collection at field %s', $name));
-                }
-
-                if ($type === FieldMapping::TYPE_ARRAY) {
-                    $result[$serializedName] = [];
-
-                    if (!is_iterable($value)) {
-                        throw new LogicException(sprintf('Expected iterable for field %s', $name));
-                    }
-
-                    foreach ($value as $child) {
-                        $result[$serializedName][] = $this->mapEntity($child, $mapping);
-                    }
-                } else {
-                    $result[$serializedName] = $this->mapEntity($value, $mapping);
-                }
-            } else {
-                $result[$serializedName] = $value;
-            }
+            $result[$serializedName] = $this->mapField($entity, $field);
         }
 
         return $result;
+    }
+
+    private function mapField($entity, FieldMapping $field) {
+        $name = $field->getName();
+        $type = $field->getType();
+
+        if (!$this->propertyAccessor->isReadable($entity, $name)) {
+            throw new \RuntimeException(sprintf('Field with name %s is not readable on entity %s', $name, get_class($entity)));
+        }
+
+        $value = $this->propertyAccessor->getValue($entity, $name);
+
+        if (in_array($type, [FieldMapping::TYPE_ENTITY, FieldMapping::TYPE_ARRAY])) {
+            $arrayType = $field->getArrayType();
+
+            if ($value === null) {
+                return $arrayType !== null ? [] : null;
+            }
+
+            $mapping = $field->getEntryMapping();
+
+            if (!$mapping instanceof EntityMapping && !$mapping instanceof FieldMapping) {
+                throw new LogicException(sprintf('Invalid entity mapping for collection at field %s', $name));
+            }
+
+            if ($type === FieldMapping::TYPE_ARRAY) {
+                $list = [];
+
+                if (!is_iterable($value)) {
+                    throw new LogicException(sprintf('Expected iterable for field %s', $name));
+                }
+
+                if ($arrayType !== null) {
+                    return $value ?? [];
+                }
+
+                foreach ($value as $child) {
+                    if ($mapping instanceof EntityMapping) {
+                        $list[] = $this->mapEntity($child, $mapping);
+                    } else {
+                        $list[] = $this->mapField($child, $mapping);
+                    }
+                }
+
+                return $list;
+            } else {
+                return $mapping instanceof EntityMapping ? $this->mapEntity($value, $mapping) : $this->mapField($value, $mapping);
+            }
+        } else {
+            return $value;
+        }
     }
 
     /**

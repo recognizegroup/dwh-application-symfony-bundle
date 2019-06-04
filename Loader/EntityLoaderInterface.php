@@ -51,6 +51,18 @@ interface EntityLoaderInterface
     function getEntityType(): string;
 
     /**
+     * Translates database result to schema. How it works:
+     * - Every entity is mapped FROM the database to a JSON response
+     * - Fields of an entity can be added by using a field mapping
+     * - If you want to change the name that ends up in the serialization, you can use map_to
+     * - Sometimes, you might want to serialize a nested entity. You can use an entity type, in combination with a
+     *   entry_mapping, which can be:
+     *      - a new entity mapping
+     *      - a field mapping, if you want to serialize an entire entity based as one field (ex. User -> email)
+     *        This does require a reference to the parent class, using parent, for validation purposes
+     * - You can also serialize collections using the array type and the entry_mapping
+     * - If you want to serialize an array of primitive types, you can use array_type
+     *
      * @return EntityMapping
      */
     function getEntityMapping(): EntityMapping;

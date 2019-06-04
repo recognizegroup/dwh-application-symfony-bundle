@@ -18,6 +18,7 @@ class FieldMapping
     public const TYPE_INTEGER = 'integer';
     public const TYPE_BOOLEAN = 'boolean';
     public const TYPE_DATE_TIME = 'date-time';
+    public const TYPE_EMAIL = 'email';
 
     /** @var string */
     private $name;
@@ -93,13 +94,27 @@ class FieldMapping
      * @return string
      */
     public function getSerializedName(): string {
-        return $this->options['map_to'] ?? NameHelper::camelToSnake($this->name);
+        return NameHelper::camelToSnake($this->options['map_to'] ?? $this->name);
     }
 
     /**
-     * @return EntityMapping|null
+     * @return string|null
      */
-    public function getEntryMapping(): ?EntityMapping {
+    public function getArrayType(): ?string {
+        return $this->options['array_type'] ?? null;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getParent(): ?string {
+        return $this->options['parent'] ?? null;
+    }
+
+    /**
+     * @return EntityMapping|FieldMapping|null
+     */
+    public function getEntryMapping() {
         return $this->options['entry_mapping'] ?? null;
     }
 }
