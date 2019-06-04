@@ -56,16 +56,32 @@ class ValidationService
 
         /** @var FieldMapping $field */
         foreach ($mapping->getFields() as $field) {
-            if (!$this->propertyAccessor->isReadable($instance, $field->getName())) {
-                $errors[] = sprintf('Unable to read field %s for entity %s', $field->getName(), $entityClass);
-                continue;
-            }
+            $this->validateField($instance, $field, $errors);
+        }
+    }
 
-            $type = $field->getType();
-            if (in_array($type, [FieldMapping::TYPE_ARRAY, FieldMapping::TYPE_ENTITY])) {
-                $entryMapping = $field->getEntryMapping();
+    /**
+     * @param $instance
+     * @param FieldMapping $field
+     * @param array $errors
+     */
+    private function validateField($instance, FieldMapping $field, array &$errors) {
+        if (!$this->propertyAccessor->isReadable($instance, $field->getName())) {
+            $errors[] = sprintf('Unable to read field %s for entity %s', $field->getName(), get_class($instance));
+            return;
+        }
 
+        $type = $field->getType();
+        if (in_array($type, [FieldMapping::TYPE_ARRAY, FieldMapping::TYPE_ENTITY])) {
+            $entryMapping = $field->getEntryMapping();
+
+            if ($entryMapping instanceof EntityMapping) {
                 $this->validateMapping($entryMapping, $errors);
+            } else if ($entryMapping instanceof FieldMapping) {
+                $parent = $entryMapping->getParent();
+                $instance = new $parent;
+
+                $this->validateField($instance, $entryMapping, $errors);
             }
         }
     }
