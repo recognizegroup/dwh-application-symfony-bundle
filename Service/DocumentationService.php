@@ -147,18 +147,17 @@ class DocumentationService
      * @param array $components
      */
     private function addArraySchema(string $name, string $schemaPath, array &$components) {
-        $components[$name] = $this->createArraySchema($name, $schemaPath);
+        $components[$name] = $this->createArraySchema(new OASv3\Reference($schemaPath));
     }
 
     /**
-     * @param string $name
-     * @param string $schemaPath
+     * @param mixed $itemType
      * @return OASv3\Schema
      */
-    private function createArraySchema(string $name, string $schemaPath) {
+    private function createArraySchema($itemType) {
         return new OASv3\Schema([
             'type' => 'array',
-            'items' => new OASv3\Reference($schemaPath),
+            'items' => $itemType,
         ]);
     }
 
@@ -194,23 +193,37 @@ class DocumentationService
             if (\in_array($type, [FieldMapping::TYPE_ARRAY, FieldMapping::TYPE_ENTITY], true)) {
                 $schemaName = ucfirst($field->getName());
 
-                if ($type === FieldMapping::TYPE_ARRAY) {
-                    [$pluralName, $schemaName] = NameHelper::splitPluralName($schemaName);
-                }
-
-                $entryMapping = $field->getEntryMapping();
-                $this->addSchema($schemaName, $entryMapping, $components);
-
-                if ($type === FieldMapping::TYPE_ARRAY) {
-                    $properties[$serializedName] = $this->createArraySchema(
-                        $field->getName(),
-                        $this->createSchemaPath($schemaName)
-                    );
+                $arrayType = $field->getArrayType();
+                if ($arrayType !== null) {
+                    $properties[$serializedName] = $this->createArraySchema($this->createField($arrayType));
                 } else {
-                    $properties[$serializedName] = new OASv3\Reference($this->createSchemaPath($schemaName));
+                    if ($type === FieldMapping::TYPE_ARRAY) {
+                        [$pluralName, $schemaName] = NameHelper::splitPluralName($schemaName);
+                    }
+
+                    $entryMapping = $field->getEntryMapping();
+
+                    $fieldOnly = true;
+                    if ($entryMapping instanceof EntityMapping) {
+                        $fieldOnly = false;
+                        $this->addSchema($schemaName, $entryMapping, $components);
+                    }
+
+                    $schemaItem = $fieldOnly
+                        ?
+                        $this->createField($entryMapping->getArrayType() ?? $entryMapping->getType())
+                        :
+                        new OASv3\Reference($this->createSchemaPath($schemaName))
+                    ;
+
+                    if ($type === FieldMapping::TYPE_ARRAY) {
+                        $properties[$serializedName] = $this->createArraySchema($schemaItem);
+                    } else {
+                        $properties[$serializedName] = $schemaItem;
+                    }
                 }
             } else {
-                $properties[$serializedName] = $this->createField($field);
+                $properties[$serializedName] = $this->createField($field->getType());
             }
         }
 
@@ -222,16 +235,18 @@ class DocumentationService
     }
 
     /**
-     * @param FieldMapping $mapping
+     * @param string $type
      * @return OASv3\Schema
      */
-    private function createField(FieldMapping $mapping): OASv3\Schema {
-        $type = $mapping->getType();
+    private function createField(string $type): OASv3\Schema {
         $format = null;
 
         if ($type === FieldMapping::TYPE_DATE_TIME) {
             $type = FieldMapping::TYPE_STRING;
             $format = FieldMapping::TYPE_DATE_TIME;
+        } else if ($type === FieldMapping::TYPE_EMAIL) {
+            $type = FieldMapping::TYPE_STRING;
+            $format = FieldMapping::TYPE_EMAIL;
         }
 
         if ($format === null) {
