@@ -34,7 +34,8 @@ access_control:
 The encrypted token requires a token that is encrypted with the specified encryption.
 ```yaml
 recognize_dwh:
-      path: /api/dwh
-      encryption: bcrypt
-      encrypted_token: $2y$12$ADbwlXKfMjsHKayFlBSuLuu02FkrtgzdNWfCOrzWrCR8zkSoNsUfG
+    protocol_version: 1.0.0
+    specification_version: 1.0.0
+    encryption: bcrypt
+    encrypted_token: $2y$12$ADbwlXKfMjsHKayFlBSuLuu02FkrtgzdNWfCOrzWrCR8zkSoNsUfG
 ```
