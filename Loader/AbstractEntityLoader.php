@@ -11,6 +11,7 @@ use Doctrine\ORM\QueryBuilder;
 use LogicException;
 use Recognize\DwhApplication\Model\BaseOptions;
 use Recognize\DwhApplication\Model\DetailOptions;
+use Recognize\DwhApplication\Model\Filter;
 use Recognize\DwhApplication\Model\ListOptions;
 use Recognize\DwhApplication\Model\ProtocolResponse;
 use Recognize\DwhApplication\Schema\EntityMapping;
@@ -50,6 +51,12 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
     }
 
     /**
+     * @return array|Filter[]
+     */
+    abstract function getFilters(): array;
+
+
+    /**
      * @param ListOptions $listOptions
      * @return ProtocolResponse
      * @throws NonUniqueResultException
@@ -58,6 +65,7 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
     {
         $queryBuilder = $this->createQueryBuilder($listOptions);
 
+        $this->applyFilters($queryBuilder, $listOptions->getFilers());
         $queryBuilder->setMaxResults($listOptions->getLimit());
         $queryBuilder->setFirstResult(($listOptions->getPage() - 1) * $listOptions->getLimit());
 
@@ -101,10 +109,37 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
     }
 
     /**
+     * @param QueryBuilder $queryBuilder
+     * @param Filter $filter
+     */
+    private function applyFilter(QueryBuilder $queryBuilder, Filter $filter)
+    {
+        $queryBuilder->andWhere($filter->getField().' '.$filter->getOperator().' '.$filter->getValue());
+    }
+
+    /**
+     * @param QueryBuilder   $queryBuilder
+     * @param array|Filter[] $filters
+     */
+    private function applyFilters(QueryBuilder $queryBuilder, array $filters)
+    {
+        $availableFilters = array_map(function(Filter $filter) {
+            return $filter->getField();
+        }, $this->getFilters());
+
+        foreach ($filters as $filter) {
+            if(\in_array($filter->getField(), $availableFilters, true)) {
+                $this->applyFilter($queryBuilder, $filter);
+            }
+        }
+    }
+
+    /**
      * @param array $results
      * @return array
      */
-    private function mapList(array $results): array {
+    private function mapList(array $results): array
+    {
         $mapping = $this->getEntityMapping();
 
         return array_map(function ($entity) use ($mapping) {
@@ -117,7 +152,8 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
      * @param EntityMapping $mapping
      * @return array
      */
-    private function mapEntity($entity, EntityMapping $mapping): array {
+    private function mapEntity($entity, EntityMapping $mapping): array
+    {
         $result = [];
 
         /** @var FieldMapping $field */
@@ -164,7 +200,8 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
      * @param BaseOptions $options
      * @return QueryBuilder
      */
-    private function createQueryBuilder(BaseOptions $options): QueryBuilder {
+    private function createQueryBuilder(BaseOptions $options): QueryBuilder
+    {
         /** @var EntityRepository $repository */
         $repository = $this->entityManager->getRepository($this->getEntityType());
         $name = self::ENTITY_ALIAS;

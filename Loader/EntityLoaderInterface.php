@@ -4,6 +4,7 @@ namespace Recognize\DwhApplication\Loader;
 
 use Doctrine\ORM\QueryBuilder;
 use Recognize\DwhApplication\Model\DetailOptions;
+use Recognize\DwhApplication\Model\Filter;
 use Recognize\DwhApplication\Model\ListOptions;
 use Recognize\DwhApplication\Model\ProtocolResponse;
 use Recognize\DwhApplication\Schema\EntityMapping;

@@ -16,6 +16,9 @@ class ListOptions extends BaseOptions
     /** @var int|null */
     private $limit;
 
+    /** @var Filter[] */
+    private $filers;
+
     /**
      * @return int|null
      */
@@ -46,5 +49,21 @@ class ListOptions extends BaseOptions
     public function setLimit(?int $limit): void
     {
         $this->limit = $limit;
+    }
+
+    /**
+     * @return Filter[]
+     */
+    public function getFilers(): array
+    {
+        return $this->filers;
+    }
+
+    /**
+     * @param Filter[] $filers
+     */
+    public function setFilers(array $filers): void
+    {
+        $this->filers = $filers;
     }
 }

@@ -52,6 +52,7 @@ class DocumentationService
             $pluralSchemaPath = $this->createSchemaPath($pluralName);
             $singularSchemaPath = $this->createSchemaPath($singularName);
 
+            $this->addFilterSchema($components);
             $this->addSchema($singularName, $loader->getEntityMapping(), $components);
             $this->addArraySchema($pluralName, $singularSchemaPath, $components);
 
@@ -190,7 +191,7 @@ class DocumentationService
             $serializedName = $field->getSerializedName();
             $type = $field->getType();
 
-            if (in_array($type, [FieldMapping::TYPE_ARRAY, FieldMapping::TYPE_ENTITY])) {
+            if (\in_array($type, [FieldMapping::TYPE_ARRAY, FieldMapping::TYPE_ENTITY], true)) {
                 $schemaName = ucfirst($field->getName());
 
                 if ($type === FieldMapping::TYPE_ARRAY) {
@@ -214,6 +215,10 @@ class DocumentationService
         }
 
         $components[$name] = new OASv3\Schema(['properties' => $properties]);
+    }
+
+    private function addFilterSchema(array &$components) {
+        $components['Filters'] = new OASv3\Schema(['title' => 'Filters']);
     }
 
     /**

@@ -107,6 +107,7 @@ abstract class AbstractDwhApiController extends AbstractController
     private function buildListOptions(Request $request): ListOptions {
         $page = $request->query->getInt(self::PAGE_PARAMETER, self::PAGE_DEFAULT_VALUE);
         $limit = $request->query->getInt(self::LIMIT_PARAMETER, self::LIMIT_DEFAULT_VALUE);
+        $filters = $this->getFiltersFromRequest($request);
 
         if ($page <= 0 || $limit > self::LIMIT_MAX_VALUE || $limit < 0) {
             throw new BadRequestHttpException();
@@ -115,6 +116,7 @@ abstract class AbstractDwhApiController extends AbstractController
         $options = new ListOptions();
         $options->setPage($page);
         $options->setLimit($limit);
+        $options->setFilers($filters);
 
         /** @var DwhUser $user */
         $user = $this->getUser();
@@ -136,6 +138,15 @@ abstract class AbstractDwhApiController extends AbstractController
         $options->setTenant($user->getUuid());
 
         return $options;
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     */
+    private function getFiltersFromRequest(Request $request): array {
+        dump($request->query);
+        return [];
     }
 
     /**
