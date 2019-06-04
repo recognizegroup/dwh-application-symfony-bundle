@@ -2,19 +2,21 @@
 
 namespace Recognize\DwhApplication\Controller;
 
-use JMS\Serializer\SerializerBuilder;
 use Recognize\DwhApplication\Loader\EntityLoaderInterface;
 use Recognize\DwhApplication\Model\DetailOptions;
 use Recognize\DwhApplication\Model\DwhUser;
 use Recognize\DwhApplication\Model\ListOptions;
 use Recognize\DwhApplication\Service\DocumentationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 
 /**
  * Class AbstractDwhApiController
@@ -141,7 +143,10 @@ abstract class AbstractDwhApiController extends AbstractController
      * @return Response
      */
     private function serialize($data): Response {
-        $serializer = SerializerBuilder::create()->build();
+        $encoders = [new JsonEncoder()];
+        $normalizers = [new DateTimeNormalizer(), new ObjectNormalizer()];
+
+        $serializer = new Serializer($normalizers, $encoders);
 
         $response = new Response($serializer->serialize($data, 'json'));
         $response->headers->set('Content-Type', 'application/json');
