@@ -27,11 +27,13 @@ class Filter
      * Filter constructor.
      * @param string $operator
      * @param string $field
+     * @param string|null $value
      */
-    public function __construct(string $operator, string $field)
+    public function __construct(string $operator, string $field, string $value = null)
     {
         $this->operator = $operator;
         $this->field = $field;
+        $this->value = $value;
     }
 
     /**

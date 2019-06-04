@@ -111,10 +111,12 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
     /**
      * @param QueryBuilder $queryBuilder
      * @param Filter $filter
+     * @param string $statementName
      */
-    private function applyFilter(QueryBuilder $queryBuilder, Filter $filter)
+    private function applyFilter(QueryBuilder $queryBuilder, Filter $filter, string $statementName)
     {
-        $queryBuilder->andWhere($filter->getField().' '.$filter->getOperator().' '.$filter->getValue());
+        $queryBuilder->andWhere('entity.'.$filter->getField().' '.$filter->getOperator().' :'.$statementName);
+        $queryBuilder->setParameter($statementName, $filter->getValue());
     }
 
     /**
@@ -127,9 +129,9 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
             return $filter->getField();
         }, $this->getFilters());
 
-        foreach ($filters as $filter) {
+        foreach ($filters as $index => $filter) {
             if(\in_array($filter->getField(), $availableFilters, true)) {
-                $this->applyFilter($queryBuilder, $filter);
+                $this->applyFilter($queryBuilder, $filter, $filter->getField().$index);
             }
         }
     }

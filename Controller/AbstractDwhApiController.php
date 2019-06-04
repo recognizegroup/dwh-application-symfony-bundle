@@ -5,6 +5,7 @@ namespace Recognize\DwhApplication\Controller;
 use Recognize\DwhApplication\Loader\EntityLoaderInterface;
 use Recognize\DwhApplication\Model\DetailOptions;
 use Recognize\DwhApplication\Model\DwhUser;
+use Recognize\DwhApplication\Model\Filter;
 use Recognize\DwhApplication\Model\ListOptions;
 use Recognize\DwhApplication\Service\DocumentationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -30,6 +31,14 @@ abstract class AbstractDwhApiController extends AbstractController
     private const LIMIT_PARAMETER = 'limit';
     private const LIMIT_DEFAULT_VALUE = 25;
     private const LIMIT_MAX_VALUE = 50;
+
+    protected const OPERATOR_MAPPING = [
+        'gt' => '>',
+        'lt' => '<',
+        'leq' => '<=',
+        'geq' => '>=',
+        'eq' => '='
+    ];
 
     /** @var EntityLoaderInterface[]|array */
     private $entityTypes = [];
@@ -145,8 +154,18 @@ abstract class AbstractDwhApiController extends AbstractController
      * @return array
      */
     private function getFiltersFromRequest(Request $request): array {
-        dump($request->query);
-        return [];
+        $parameters = array_filter($request->query->all(), 'is_array');
+        $filters = [];
+        foreach ($parameters as $field => $operators) {
+            foreach ($operators as $operatorKey => $value) {
+                if (array_key_exists($operatorKey, $this::OPERATOR_MAPPING)) {
+                    $filters[] = new Filter($this::OPERATOR_MAPPING[$operatorKey], $field, $value);
+                }
+            }
+        }
+        dump($filters);
+
+        return $filters;
     }
 
     /**
