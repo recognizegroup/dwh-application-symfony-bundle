@@ -80,7 +80,7 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
         $countQueryBuilder->select(sprintf('COUNT(%s)', self::ENTITY_ALIAS));
 
         $total = (int) $countQueryBuilder->getQuery()
-                    ->getSingleScalarResult();
+            ->getSingleScalarResult();
 
         $mapped = $this->mapList($results);
 
@@ -126,8 +126,8 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
          */
         foreach ($filters as $index => $requestFilter) {
             $definedFilter = array_filter($availableFilters, function (Filter $filter) use ($requestFilter) {
-                return strtolower($filter->getQueryParameter()) === strtolower($requestFilter->getField());
-            })[0] ?? null;
+                    return strtolower($filter->getQueryParameter()) === strtolower($requestFilter->getField());
+                })[0] ?? null;
 
             if ($definedFilter instanceof Filter) {
                 $parameterName = sprintf('%s_%s', $definedFilter->getField(), $requestFilter->getOperator());
@@ -215,6 +215,10 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
 
         if (in_array($type, [FieldMapping::TYPE_ENTITY, FieldMapping::TYPE_ARRAY])) {
             $arrayType = $field->getArrayType();
+
+            if ($type === FieldMapping::TYPE_ARRAY && $arrayType !== null) {
+                return $value ?? [];
+            }
 
             if ($value === null) {
                 return $arrayType !== null ? [] : null;
