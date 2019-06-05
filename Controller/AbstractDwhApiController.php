@@ -5,7 +5,9 @@ namespace Recognize\DwhApplication\Controller;
 use Recognize\DwhApplication\Loader\EntityLoaderInterface;
 use Recognize\DwhApplication\Model\DetailOptions;
 use Recognize\DwhApplication\Model\DwhUser;
+use Recognize\DwhApplication\Model\Filter;
 use Recognize\DwhApplication\Model\ListOptions;
+use Recognize\DwhApplication\Model\RequestFilter;
 use Recognize\DwhApplication\Service\DocumentationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -107,6 +109,7 @@ abstract class AbstractDwhApiController extends AbstractController
     private function buildListOptions(Request $request): ListOptions {
         $page = $request->query->getInt(self::PAGE_PARAMETER, self::PAGE_DEFAULT_VALUE);
         $limit = $request->query->getInt(self::LIMIT_PARAMETER, self::LIMIT_DEFAULT_VALUE);
+        $filters = $this->getFiltersFromRequest($request);
 
         if ($page <= 0 || $limit > self::LIMIT_MAX_VALUE || $limit < 0) {
             throw new BadRequestHttpException();
@@ -115,6 +118,7 @@ abstract class AbstractDwhApiController extends AbstractController
         $options = new ListOptions();
         $options->setPage($page);
         $options->setLimit($limit);
+        $options->setFilters($filters);
 
         /** @var DwhUser $user */
         $user = $this->getUser();
@@ -136,6 +140,25 @@ abstract class AbstractDwhApiController extends AbstractController
         $options->setTenant($user->getUuid());
 
         return $options;
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     */
+    private function getFiltersFromRequest(Request $request): array {
+        $parameters = array_filter($request->query->all(), 'is_array');
+        $filters = [];
+
+        foreach ($parameters as $field => $operators) {
+            foreach ($operators as $operatorKey => $value) {
+                if (in_array($operatorKey, Filter::OPERATORS_ALL)) {
+                    $filters[] = new RequestFilter($field, $operatorKey, $value);
+                }
+            }
+        }
+
+        return $filters;
     }
 
     /**
