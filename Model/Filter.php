@@ -34,9 +34,6 @@ class Filter
     /** @var string */
     private $type;
 
-    /** @var mixed|null */
-    private $value;
-
     /**
      * @return string[]
      */
@@ -90,25 +87,6 @@ class Filter
     public function setField(string $field): self
     {
         $this->field = $field;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getValue(): string
-    {
-        return $this->value;
-    }
-
-    /**
-     * @param mixed $value
-     * @return Filter
-     */
-    public function setValue($value): self
-    {
-        $this->value = (string) $value;
 
         return $this;
     }
