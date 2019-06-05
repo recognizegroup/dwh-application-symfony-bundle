@@ -16,8 +16,8 @@ class ListOptions extends BaseOptions
     /** @var int|null */
     private $limit;
 
-    /** @var Filter[] */
-    private $filers;
+    /** @var RequestFilter[] */
+    private $filters;
 
     /**
      * @return int|null
@@ -52,18 +52,19 @@ class ListOptions extends BaseOptions
     }
 
     /**
-     * @return Filter[]
+     * @return RequestFilter[]
      */
-    public function getFilers(): array
+    public function getFilters(): array
     {
-        return $this->filers;
+        return $this->filters;
     }
 
     /**
-     * @param Filter[] $filers
+     * @param RequestFilter[] $filters
      */
-    public function setFilers(array $filers): void
+    public function setFilters(array $filters): void
     {
-        $this->filers = $filers;
+        $this->filters = $filters;
     }
+
 }

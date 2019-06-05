@@ -8,51 +8,74 @@ namespace Recognize\DwhApplication\Model;
  */
 class Filter
 {
-    /**
-     * @var string
-     */
-    private $operator;
+    public const OPERATOR_GREATER_THAN = 'gt';
+    public const OPERATOR_GREATER_OR_EQUAL_THAN = 'geq';
+    public const OPERATOR_LESS_THAN = 'lt';
+    public const OPERATOR_LESS_OR_EQUAL_THAN = 'leq';
+    public const OPERATOR_EQUAL = 'eq';
 
-    /**
-     * @var string
-     */
+    public const OPERATORS_ALL = [
+        self::OPERATOR_GREATER_THAN,
+        self::OPERATOR_GREATER_OR_EQUAL_THAN,
+        self::OPERATOR_LESS_THAN,
+        self::OPERATOR_LESS_OR_EQUAL_THAN,
+        self::OPERATOR_EQUAL,
+    ];
+
+    /** @var string[] */
+    private $operators = [];
+
+    /** @var string */
+    private $queryParameter;
+
+    /** @var string */
     private $field;
 
-    /**
-     * @var string|null
-     */
+    /** @var string */
+    private $type;
+
+    /** @var mixed|null */
     private $value;
 
     /**
-     * Filter constructor.
-     * @param string $operator
-     * @param string $field
-     * @param string|null $value
+     * @return string[]
      */
-    public function __construct(string $operator, string $field, string $value = null)
+    public function getOperators(): array
     {
-        $this->operator = $operator;
-        $this->field = $field;
-        $this->value = $value;
+        return $this->operators;
+    }
+
+    /**
+     * @param string[]|string $operators
+     * @return Filter
+     */
+    public function setOperators($operators): self
+    {
+        $this->operators = is_array($operators) ? $operators : [$operators];
+
+        return $this;
     }
 
     /**
      * @return string
      */
-    public function getOperator(): string
+    public function getQueryParameter(): string
     {
-        return $this->operator;
+        return $this->queryParameter ?? $this->field;
     }
 
     /**
-     * @param string $operator
+     * @param string $queryParameter
+     * @return Filter
      */
-    public function setOperator(string $operator): void
+    public function setQueryParameter(string $queryParameter): self
     {
-        $this->operator = $operator;
+        $this->queryParameter = $queryParameter;
+
+        return $this;
     }
 
-    /**
+    /**`
      * @return string
      */
     public function getField(): string
@@ -62,10 +85,13 @@ class Filter
 
     /**
      * @param string $field
+     * @return Filter
      */
-    public function setField(string $field): void
+    public function setField(string $field): self
     {
         $this->field = $field;
+
+        return $this;
     }
 
     /**
@@ -78,9 +104,30 @@ class Filter
 
     /**
      * @param mixed $value
+     * @return Filter
      */
-    public function setValue($value): void
+    public function setValue($value): self
     {
         $this->value = (string) $value;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    /**
+     * @param string $type
+     * @return Filter
+     */
+    public function setType(string $type): self
+    {
+        $this->type = $type;
+        return $this;
     }
 }

@@ -22,14 +22,19 @@ class ValidationService
     /** @var PropertyAccessor */
     private $propertyAccessor;
 
+    /** @var DocumentationService */
+    private $documentationService;
+
     /**
      * ValidateCommand constructor.
      * @param array|EntityLoaderInterface[] $loaders
+     * @param DocumentationService $documentationService
      */
-    public function __construct($loaders)
+    public function __construct($loaders, DocumentationService $documentationService)
     {
         $this->loaders = $loaders;
         $this->propertyAccessor = new PropertyAccessor();
+        $this->documentationService = $documentationService;
     }
 
     /**
@@ -42,6 +47,8 @@ class ValidationService
         foreach ($this->loaders as $loader) {
             $this->validateMapping($loader->getEntityMapping(), $errors);
         }
+
+        $this->validateDocumentation($this->loaders, $errors);
 
         return $errors;
     }
@@ -83,6 +90,19 @@ class ValidationService
 
                 $this->validateField($instance, $entryMapping, $errors);
             }
+        }
+    }
+
+    /**
+     * @param \Iterator|EntityLoaderInterface[] $loaders
+     * @param array $errors
+     */
+    private function validateDocumentation($loaders, array &$errors)
+    {
+        try {
+            $this->documentationService->generate(iterator_to_array($loaders));
+        } catch (\Throwable $error) {
+            $errors[] = sprintf('Could not generate documentation: %s', $error->getMessage());
         }
     }
 }

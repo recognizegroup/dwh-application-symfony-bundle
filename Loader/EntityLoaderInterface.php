@@ -7,6 +7,7 @@ use Recognize\DwhApplication\Model\DetailOptions;
 use Recognize\DwhApplication\Model\Filter;
 use Recognize\DwhApplication\Model\ListOptions;
 use Recognize\DwhApplication\Model\ProtocolResponse;
+use Recognize\DwhApplication\Model\RequestFilter;
 use Recognize\DwhApplication\Schema\EntityMapping;
 
 /**
@@ -47,9 +48,22 @@ interface EntityLoaderInterface
     function applyIdentifier(QueryBuilder $queryBuilder, string $alias, string $identifier);
 
     /**
+     * Applies filters
+     *
+     * @param QueryBuilder $queryBuilder
+     * @param RequestFilter[] $filters
+     */
+    function applyFilters(QueryBuilder $queryBuilder, array $filters);
+
+    /**
      * @return string
      */
     function getEntityType(): string;
+
+    /**
+     * @return array|Filter[]
+     */
+    function getFilters(): array;
 
     /**
      * Translates database result to schema. How it works:

@@ -3,7 +3,9 @@
 namespace Recognize\DwhApplication\Service;
 
 use erasys\OpenApi\Spec\v3 as OASv3;
+use mysql_xdevapi\Exception;
 use Recognize\DwhApplication\Loader\EntityLoaderInterface;
+use Recognize\DwhApplication\Model\Filter;
 use Recognize\DwhApplication\Schema\EntityMapping;
 use Recognize\DwhApplication\Schema\FieldMapping;
 use Recognize\DwhApplication\Util\NameHelper;
@@ -52,11 +54,10 @@ class DocumentationService
             $pluralSchemaPath = $this->createSchemaPath($pluralName);
             $singularSchemaPath = $this->createSchemaPath($singularName);
 
-            $this->addFilterSchema($components);
             $this->addSchema($singularName, $loader->getEntityMapping(), $components);
             $this->addArraySchema($pluralName, $singularSchemaPath, $components);
 
-            $paths[sprintf('/%s', $type)] = $this->createListPathItem($type, $pluralSchemaPath);
+            $paths[sprintf('/%s', $type)] = $this->createListPathItem($type, $pluralSchemaPath, $loader->getFilters());
             $paths[sprintf('/%s/{id}', $type)] = $this->createDetailPathItem($type, $singularSchemaPath);
         }
 
@@ -69,8 +70,8 @@ class DocumentationService
                     'schemas' => $components,
                 ]),
                 'servers' => [
-                    new OASv3\Server($this->router->generate('recognize_dwh_definition', [], UrlGeneratorInterface::ABSOLUTE_URL))
-                ]
+                    new OASv3\Server($this->router->generate('recognize_dwh_definition', [], UrlGeneratorInterface::ABSOLUTE_URL)),
+                ],
             ]
         );
 
@@ -80,9 +81,30 @@ class DocumentationService
     /**
      * @param string $type
      * @param string $schemaPath
+     * @param Filter[] $filters
      * @return OASv3\PathItem
      */
-    private function createListPathItem(string $type, string $schemaPath): OASv3\PathItem {
+    private function createListPathItem(string $type, string $schemaPath, array $filters = []): OASv3\PathItem {
+        $parameters = [
+            new OASv3\Parameter(
+                'limit',
+                'query',
+                null,
+                ['schema' => new OASv3\Schema(['type' => 'integer'])]
+            ),
+            new OASv3\Parameter(
+                'page',
+                'query',
+                null,
+                ['schema' => new OASv3\Schema(['type' => 'integer'])]
+            ),
+        ];
+
+        /** @var Filter $filter */
+        foreach ($filters as $filter) {
+            $parameters = array_merge($parameters, $this->createParametersForFilter($filter));
+        }
+
         $operation = new OASv3\Operation(
             [
                 '200' => $this->createResponse(sprintf('List of %s', $type), $schemaPath),
@@ -90,20 +112,7 @@ class DocumentationService
             null,
             null,
             [
-                'parameters' => [
-                    new OASv3\Parameter(
-                        'limit',
-                        'query',
-                        null,
-                        ['schema' => new OASv3\Schema(['type' => 'integer'])]
-                    ),
-                    new OASv3\Parameter(
-                        'page',
-                        'query',
-                        null,
-                        ['schema' => new OASv3\Schema(['type' => 'integer'])]
-                    )
-                ],
+                'parameters' => $parameters,
             ]
         );
 
@@ -131,7 +140,7 @@ class DocumentationService
                         'path',
                         null,
                         ['required' => true, 'schema' => new OASv3\Schema(['type' => 'integer'])]
-                    )
+                    ),
                 ],
             ]
         );
@@ -230,10 +239,6 @@ class DocumentationService
         $components[$name] = new OASv3\Schema(['properties' => $properties]);
     }
 
-    private function addFilterSchema(array &$components) {
-        $components['Filters'] = new OASv3\Schema(['title' => 'Filters']);
-    }
-
     /**
      * @param string $type
      * @return OASv3\Schema
@@ -254,6 +259,47 @@ class DocumentationService
         } else {
             return new OASv3\Schema(['type' => $type, 'format' => $format]);
         }
+    }
+
+    /**
+     * @param Filter $filter
+     * @return OASv3\Parameter[]
+     */
+    private function createParametersForFilter(Filter $filter): array {
+        $result = [];
+
+        foreach ($filter->getOperators() as $operator) {
+            $name = sprintf('%s[%s]', $filter->getQueryParameter(), $operator);
+
+            $operatorDescriptions = [
+                Filter::OPERATOR_EQUAL => 'equal to',
+                Filter::OPERATOR_GREATER_THAN => 'greater than',
+                Filter::OPERATOR_GREATER_OR_EQUAL_THAN => 'greater than or equal to',
+                Filter::OPERATOR_LESS_THAN => 'less than or equal to',
+                Filter::OPERATOR_LESS_OR_EQUAL_THAN => 'less than or equal to',
+            ];
+
+            $operatorDescription = $operatorDescriptions[$operator] ?? null;
+
+            if ($operatorDescription === null) {
+                throw new \LogicException(sprintf('Unsupported operator %s', $operator));
+            }
+
+            $description = sprintf('Filter field %s %s where the value is of type %s', $filter->getQueryParameter(), $operatorDescription, $filter->getType());
+
+            if ($filter->getType() === FieldMapping::TYPE_DATE_TIME) {
+                $description .= ' (in format of ISO8601)';
+            }
+
+            $result[] = new OASv3\Parameter(
+                $name,
+                'query',
+                $description,
+                ['schema' => $this->createField($filter->getType())]
+            );
+        }
+
+        return $result;
     }
 
     /**
