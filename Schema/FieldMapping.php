@@ -13,6 +13,7 @@ use Recognize\DwhApplication\Util\NameHelper;
 class FieldMapping
 {
     public const TYPE_ARRAY = 'array';
+    public const TYPE_OBJECT = 'object';
     public const TYPE_STRING = 'string';
     public const TYPE_ENTITY = 'entity';
     public const TYPE_INTEGER = 'integer';

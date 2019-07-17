@@ -3,7 +3,6 @@
 namespace Recognize\DwhApplication\Service;
 
 use erasys\OpenApi\Spec\v3 as OASv3;
-use mysql_xdevapi\Exception;
 use Recognize\DwhApplication\Loader\EntityLoaderInterface;
 use Recognize\DwhApplication\Model\Filter;
 use Recognize\DwhApplication\Schema\EntityMapping;
