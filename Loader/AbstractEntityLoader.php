@@ -70,17 +70,18 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
         $queryBuilder = $this->createQueryBuilder($listOptions);
 
         $this->applyFilters($queryBuilder, $listOptions->getFilters());
-        $queryBuilder->setMaxResults($listOptions->getLimit());
-        $queryBuilder->setFirstResult(($listOptions->getPage() - 1) * $listOptions->getLimit());
-
-        $query = $queryBuilder->getQuery();
-        $results = $query->getResult();
 
         $countQueryBuilder = clone $queryBuilder;
         $countQueryBuilder->select(sprintf('COUNT(%s)', self::ENTITY_ALIAS));
 
         $total = (int) $countQueryBuilder->getQuery()
             ->getSingleScalarResult();
+
+        $queryBuilder->setMaxResults($listOptions->getLimit());
+        $queryBuilder->setFirstResult(($listOptions->getPage() - 1) * $listOptions->getLimit());
+
+        $query = $queryBuilder->getQuery();
+        $results = $query->getResult();
 
         $mapped = $this->mapList($results);
 
