@@ -3,6 +3,7 @@
 namespace Recognize\DwhApplication\Schema;
 
 
+use Recognize\DwhApplication\Model\DataTransformationInterface;
 use Recognize\DwhApplication\Util\NameHelper;
 
 /**
@@ -29,6 +30,9 @@ class FieldMapping
 
     /** @var array */
     private $options;
+
+    /** @var array|DataTransformationInterface[] */
+    private $transformations = [];
 
     /**
      * FieldMapping constructor.
@@ -117,5 +121,31 @@ class FieldMapping
      */
     public function getEntryMapping() {
         return $this->options['entry_mapping'] ?? null;
+    }
+
+    /**
+     * @return array|DataTransformationInterface[]
+     */
+    public function getTransformations()
+    {
+        return $this->transformations;
+    }
+
+    /**
+     * @param array|DataTransformationInterface[] $transformations
+     */
+    public function setTransformations($transformations): void
+    {
+        $this->transformations = $transformations;
+    }
+
+    /**
+     * @param DataTransformationInterface $transformation
+     * @return $this
+     */
+    public function addTransformation(DataTransformationInterface $transformation): self {
+        $this->transformations[] = $transformation;
+
+        return $this;
     }
 }

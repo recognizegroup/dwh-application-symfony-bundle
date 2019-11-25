@@ -17,6 +17,7 @@ use Recognize\DwhApplication\Model\ProtocolResponse;
 use Recognize\DwhApplication\Model\RequestFilter;
 use Recognize\DwhApplication\Schema\EntityMapping;
 use Recognize\DwhApplication\Schema\FieldMapping;
+use Recognize\DwhApplication\Service\DataPipelineService;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -48,15 +49,20 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
     /** @var string */
     private $protocolVersion;
 
+    /** @var DataPipelineService */
+    private $dataPipelineService;
+
     /**
      * AbstractEntityLoader constructor.
      * @param ManagerRegistry $managerRegistry
      * @param ParameterBagInterface $parameterBag
+     * @param DataPipelineService $dataPipelineService
      */
-    public function __construct(ManagerRegistry $managerRegistry, ParameterBagInterface $parameterBag)
+    public function __construct(ManagerRegistry $managerRegistry, ParameterBagInterface $parameterBag, DataPipelineService $dataPipelineService)
     {
         $this->entityManager = $managerRegistry->getManager();
         $this->propertyAccessor = new PropertyAccessor();
+        $this->dataPipelineService = $dataPipelineService;
         $this->protocolVersion = $parameterBag->get('recognize.dwh_application.protocol_version');
     }
 
@@ -196,7 +202,7 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
             $result[$serializedName] = $this->mapField($entity, $field);
         }
 
-        return $result;
+        return $this->dataPipelineService->apply($result, $mapping->getTransformations());
     }
 
     /**
@@ -212,6 +218,8 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
             throw new \RuntimeException(sprintf('Field with name %s is not readable on entity %s', $name, get_class($entity)));
         }
 
+        $transformations = $field->getTransformations();
+        $output = null;
         $value = $this->propertyAccessor->getValue($entity, $name);
 
         if (in_array($type, [FieldMapping::TYPE_ENTITY, FieldMapping::TYPE_ARRAY])) {
@@ -222,7 +230,9 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
             }
 
             if ($value === null) {
-                return $arrayType !== null ? [] : null;
+                $output = $arrayType !== null ? [] : null;
+
+                goto doOutput;
             }
 
             $mapping = $field->getEntryMapping();
@@ -239,7 +249,9 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
                 }
 
                 if ($arrayType !== null) {
-                    return $value ?? [];
+                    $output = $value ?? [];
+
+                    goto doOutput;
                 }
 
                 foreach ($value as $child) {
@@ -250,13 +262,24 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
                     }
                 }
 
-                return $list;
+                $output =  $list;
+
+                goto doOutput;
             } else {
-                return $mapping instanceof EntityMapping ? $this->mapEntity($value, $mapping) : $this->mapField($value, $mapping);
+                $output = $mapping instanceof EntityMapping ? $this->mapEntity($value, $mapping) : $this->mapField($value, $mapping);
+
+                goto doOutput;
             }
         } else {
-            return $value;
+            $output = $value;
+
+            goto doOutput;
         }
+
+        doOutput:
+        $output = $this->dataPipelineService->apply($output, $transformations);
+
+        return $output;
     }
 
     /**

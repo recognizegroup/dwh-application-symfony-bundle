@@ -13,6 +13,9 @@ services:
         arguments:
             $loaders: !tagged recognize.dwh_loader
 
+    Recognize\DwhApplication\Service\DataPipelineService:
+        autowire: true
+
     Recognize\DwhApplication\Command\ValidateCommand:
         autowire: true
         tags:

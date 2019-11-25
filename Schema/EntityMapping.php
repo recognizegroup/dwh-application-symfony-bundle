@@ -3,6 +3,8 @@
 namespace Recognize\DwhApplication\Schema;
 
 
+use Recognize\DwhApplication\Model\DataTransformationInterface;
+
 /**
  * Class Schema
  * @package Recognize\DwhApplication\Schema
@@ -15,6 +17,9 @@ class EntityMapping
 
     /** @var array|FieldMapping[] */
     private $fields = [];
+
+    /** @var array|DataTransformationInterface[] */
+    private $transformations = [];
 
     /**
      * EntityMapping constructor.
@@ -59,4 +64,29 @@ class EntityMapping
         return $this->fields;
     }
 
+    /**
+     * @return array|DataTransformationInterface[]
+     */
+    public function getTransformations()
+    {
+        return $this->transformations;
+    }
+
+    /**
+     * @param array|DataTransformationInterface[] $transformations
+     */
+    public function setTransformations($transformations): void
+    {
+        $this->transformations = $transformations;
+    }
+
+    /**
+     * @param DataTransformationInterface $transformation
+     * @return $this
+     */
+    public function addTransformation(DataTransformationInterface $transformation): self {
+        $this->transformations[] = $transformation;
+
+        return $this;
+    }
 }
