@@ -226,7 +226,8 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
             $arrayType = $field->getArrayType();
 
             if ($type === FieldMapping::TYPE_ARRAY && $arrayType !== null) {
-                return $value ?? [];
+                $output = $value ?? [];
+                goto doOutput;
             }
 
             if ($value === null) {
