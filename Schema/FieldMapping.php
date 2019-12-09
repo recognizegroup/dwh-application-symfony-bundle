@@ -25,7 +25,7 @@ class FieldMapping
     /** @var string */
     private $name;
 
-    /** @var string */
+    /** @var string|null */
     private $type;
 
     /** @var array */
@@ -37,10 +37,10 @@ class FieldMapping
     /**
      * FieldMapping constructor.
      * @param string $name
-     * @param string $type
+     * @param string|null $type
      * @param array $options
      */
-    public function __construct(string $name, string $type, array $options = [])
+    public function __construct(string $name, ?string $type = null, array $options = [])
     {
         $this->name = $name;
         $this->type = $type;
@@ -64,17 +64,17 @@ class FieldMapping
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getType(): string
+    public function getType(): ?string
     {
         return $this->type;
     }
 
     /**
-     * @param string $type
+     * @param string|null $type
      */
-    public function setType(string $type): void
+    public function setType(?string $type): void
     {
         $this->type = $type;
     }
