@@ -239,10 +239,14 @@ class DocumentationService
     }
 
     /**
-     * @param string $type
+     * @param string|null $type
      * @return OASv3\Schema
      */
-    private function createField(string $type): OASv3\Schema {
+    private function createField(?string $type): OASv3\Schema {
+        if ($type === null) {
+            return new OASv3\Schema(['description' => 'Mixed type.']);
+        }
+
         $format = null;
 
         if ($type === FieldMapping::TYPE_DATE_TIME) {

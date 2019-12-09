@@ -195,6 +195,8 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
     {
         $result = [];
 
+        $entity = $this->dataPipelineService->apply($entity, $mapping->getTransformations());
+
         /** @var FieldMapping $field */
         foreach ($mapping->getFields() as $field) {
             $serializedName = $field->getSerializedName();
@@ -202,7 +204,7 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
             $result[$serializedName] = $this->mapField($entity, $field);
         }
 
-        return $this->dataPipelineService->apply($result, $mapping->getTransformations());
+        return $result;
     }
 
     /**
@@ -220,7 +222,7 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
 
         $transformations = $field->getTransformations();
         $output = null;
-        $value = $this->propertyAccessor->getValue($entity, $name);
+        $value = $this->dataPipelineService->apply($this->propertyAccessor->getValue($entity, $name), $transformations);
 
         if (in_array($type, [FieldMapping::TYPE_ENTITY, FieldMapping::TYPE_ARRAY])) {
             $arrayType = $field->getArrayType();
@@ -278,8 +280,6 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
         }
 
         doOutput:
-        $output = $this->dataPipelineService->apply($output, $transformations);
-
         return $output;
     }
 
