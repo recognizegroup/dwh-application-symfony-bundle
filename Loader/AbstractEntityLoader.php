@@ -175,7 +175,7 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
     private function applyFilter(QueryBuilder $queryBuilder, Filter $baseFilter, RequestFilter $filter, string $parameterName)
     {
         // filters without a field are ignored
-        if ($filter->getField() === null) {
+        if ($baseFilter->getField() === null) {
             return;
         }
 
