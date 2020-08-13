@@ -34,6 +34,9 @@ class Filter
     /** @var string */
     private $type;
 
+    /** @var boolean */
+    private $required = false;
+
     /**
      * @return string[]
      */
@@ -106,6 +109,24 @@ class Filter
     public function setType(string $type): self
     {
         $this->type = $type;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isRequired(): bool
+    {
+        return $this->required;
+    }
+
+    /**
+     * @param bool $required
+     * @return Filter
+     */
+    public function setRequired(bool $required): self
+    {
+        $this->required = $required;
         return $this;
     }
 }
