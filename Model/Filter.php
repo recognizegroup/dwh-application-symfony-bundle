@@ -28,7 +28,7 @@ class Filter
     /** @var string */
     private $queryParameter;
 
-    /** @var string */
+    /** @var string|null */
     private $field;
 
     /** @var string */
@@ -76,18 +76,18 @@ class Filter
     }
 
     /**`
-     * @return string
+     * @return string|null
      */
-    public function getField(): string
+    public function getField(): ?string
     {
         return $this->field;
     }
 
     /**
-     * @param string $field
+     * @param string|null $field
      * @return Filter
      */
-    public function setField(string $field): self
+    public function setField(?string $field): self
     {
         $this->field = $field;
 
