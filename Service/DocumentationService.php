@@ -298,7 +298,7 @@ class DocumentationService
                 $name,
                 'query',
                 $description,
-                ['schema' => $this->createField($filter->getType())]
+                ['schema' => $this->createField($filter->getType()), 'required' => $filter->isRequired() ?? false]
             );
         }
 

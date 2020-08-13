@@ -89,7 +89,11 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
         $query = $queryBuilder->getQuery();
         $results = $query->getResult();
 
-        $mapped = $this->mapList($results);
+        $usedFilterTuples = $this->getAllowedFilters($listOptions->getFilters());
+
+        $requestFilters = array_map(function ($tuple) { return $tuple[0]; }, $usedFilterTuples);
+
+        $mapped = $this->mapList($results, $requestFilters);
 
         return new ProtocolResponse(['protocol' => $this->protocolVersion, 'page' => $listOptions->getPage(), 'limit' => $listOptions->getLimit(), 'total' => $total], $mapped);
     }
@@ -125,7 +129,25 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
      */
     public function applyFilters(QueryBuilder $queryBuilder, array $filters)
     {
+        $allowedFilters = $this->getAllowedFilters($filters);
+
+        foreach ($allowedFilters as $tuple) {
+            [$requestFilter, $definedFilter] = $tuple;
+
+            $parameterName = sprintf('%s_%s', $definedFilter->getField(), $requestFilter->getOperator());
+            $this->applyFilter($queryBuilder, $definedFilter, $requestFilter, $parameterName);
+        }
+    }
+
+    /**
+     * Returns an array of tuples that contain the request filter, and the defined filter
+     *
+     * @param array $filters
+     * @return array
+     */
+    private function getAllowedFilters(array $filters): array {
         $availableFilters = $this->getFilters();
+        $result = [];
 
         /**
          * @var int $index
@@ -137,11 +159,11 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
                 })[0] ?? null;
 
             if ($definedFilter instanceof Filter) {
-                $parameterName = sprintf('%s_%s', $definedFilter->getField(), $requestFilter->getOperator());
-
-                $this->applyFilter($queryBuilder, $definedFilter, $requestFilter, $parameterName);
+                $result[] = [$requestFilter, $definedFilter];
             }
         }
+
+        return $result;
     }
 
     /**
@@ -152,6 +174,11 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
      */
     private function applyFilter(QueryBuilder $queryBuilder, Filter $baseFilter, RequestFilter $filter, string $parameterName)
     {
+        // filters without a field are ignored
+        if ($filter->getField() === null) {
+            return;
+        }
+
         $mappedOperator = self::OPERATOR_MAPPING[$filter->getOperator()] ?? null;
 
         if (!$mappedOperator) {
@@ -175,23 +202,25 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
 
     /**
      * @param array $results
+     * @param array $usedFilters
      * @return array
      */
-    private function mapList(array $results): array
+    private function mapList(array $results, array $usedFilters = []): array
     {
         $mapping = $this->getEntityMapping();
 
-        return array_map(function ($entity) use ($mapping) {
-            return $this->mapEntity($entity, $mapping);
+        return array_map(function ($entity) use ($mapping, $usedFilters) {
+            return $this->mapEntity($entity, $mapping, $usedFilters);
         }, $results);
     }
 
     /**
      * @param $entity
      * @param EntityMapping $mapping
+     * @param array $usedFilters
      * @return array
      */
-    private function mapEntity($entity, EntityMapping $mapping): array
+    private function mapEntity($entity, EntityMapping $mapping, array $usedFilters = []): array
     {
         $result = [];
 
@@ -201,7 +230,7 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
         foreach ($mapping->getFields() as $field) {
             $serializedName = $field->getSerializedName();
 
-            $result[$serializedName] = $this->mapField($entity, $field);
+            $result[$serializedName] = $this->mapField($entity, $field, $usedFilters);
         }
 
         return $result;
@@ -210,9 +239,10 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
     /**
      * @param $entity
      * @param FieldMapping $field
+     * @param array $usedFilters
      * @return array|mixed|null
      */
-    private function mapField($entity, FieldMapping $field) {
+    private function mapField($entity, FieldMapping $field, array $usedFilters = []) {
         $name = $field->getName();
         $type = $field->getType();
 
@@ -262,9 +292,9 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
 
                 foreach ($value as $child) {
                     if ($mapping instanceof EntityMapping) {
-                        $list[] = $this->mapEntity($child, $mapping);
+                        $list[] = $this->mapEntity($child, $mapping, $usedFilters);
                     } else {
-                        $list[] = $this->mapField($child, $mapping);
+                        $list[] = $this->mapField($child, $mapping, $usedFilters);
                     }
                 }
 
@@ -272,7 +302,7 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
 
                 goto doOutput;
             } else {
-                $output = $mapping instanceof EntityMapping ? $this->mapEntity($value, $mapping) : $this->mapField($value, $mapping);
+                $output = $mapping instanceof EntityMapping ? $this->mapEntity($value, $mapping, $usedFilters) : $this->mapField($value, $mapping, $usedFilters);
 
                 goto doOutput;
             }
