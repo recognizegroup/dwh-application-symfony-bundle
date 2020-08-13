@@ -18,6 +18,7 @@ class FieldMapping
     public const TYPE_STRING = 'string';
     public const TYPE_ENTITY = 'entity';
     public const TYPE_INTEGER = 'integer';
+    public const TYPE_NUMBER = 'number';
     public const TYPE_BOOLEAN = 'boolean';
     public const TYPE_DATE_TIME = 'date-time';
     public const TYPE_EMAIL = 'email';
