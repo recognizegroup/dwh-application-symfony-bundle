@@ -254,7 +254,7 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
         $transformations = $field->getTransformations();
         $output = null;
 
-        $unprocessed = $hasCustomClosure ? $field->getOptions()['value']($entity) : $this->propertyAccessor->getValue($entity, $name);
+        $unprocessed = $hasCustomClosure ? $field->getOptions()['value']($entity, $usedFilters) : $this->propertyAccessor->getValue($entity, $name);
         $value = $this->dataPipelineService->apply($unprocessed, $transformations);
 
         if (in_array($type, [FieldMapping::TYPE_ENTITY, FieldMapping::TYPE_ARRAY])) {
