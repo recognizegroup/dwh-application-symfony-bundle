@@ -73,7 +73,9 @@ class ValidationService
      * @param array $errors
      */
     private function validateField($instance, FieldMapping $field, array &$errors) {
-        if (!$this->propertyAccessor->isReadable($instance, $field->getName())) {
+        $hasCustomClosure = isset($field->getOptions()['value']);
+
+        if (!$hasCustomClosure && !$this->propertyAccessor->isReadable($instance, $field->getName())) {
             $errors[] = sprintf('Unable to read field %s for entity %s', $field->getName(), get_class($instance));
             return;
         }

@@ -216,13 +216,16 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
         $name = $field->getName();
         $type = $field->getType();
 
-        if (!$this->propertyAccessor->isReadable($entity, $name)) {
+        $hasCustomClosure = isset($field->getOptions()['value']);
+        if (!$hasCustomClosure && !$this->propertyAccessor->isReadable($entity, $name)) {
             throw new \RuntimeException(sprintf('Field with name %s is not readable on entity %s', $name, get_class($entity)));
         }
 
         $transformations = $field->getTransformations();
         $output = null;
-        $value = $this->dataPipelineService->apply($this->propertyAccessor->getValue($entity, $name), $transformations);
+
+        $unprocessed = $hasCustomClosure ? $field->getOptions()['value']($entity) : $this->propertyAccessor->getValue($entity, $name);
+        $value = $this->dataPipelineService->apply($unprocessed, $transformations);
 
         if (in_array($type, [FieldMapping::TYPE_ENTITY, FieldMapping::TYPE_ARRAY])) {
             $arrayType = $field->getArrayType();
