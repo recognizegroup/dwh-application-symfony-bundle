@@ -154,9 +154,9 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
          * @var RequestFilter $requestFilter
          */
         foreach ($filters as $index => $requestFilter) {
-            $definedFilter = array_filter($availableFilters, function (Filter $filter) use ($requestFilter) {
+            $definedFilter = array_values(array_filter($availableFilters, function (Filter $filter) use ($requestFilter) {
                     return strtolower($filter->getQueryParameter()) === strtolower($requestFilter->getField());
-                })[0] ?? null;
+                }))[0] ?? null;
 
             if ($definedFilter instanceof Filter) {
                 $result[] = [$requestFilter, $definedFilter];
