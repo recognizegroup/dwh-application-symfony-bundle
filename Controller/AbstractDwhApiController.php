@@ -132,12 +132,15 @@ abstract class AbstractDwhApiController extends AbstractController
      * @return DetailOptions
      */
     private function buildDetailOptions(Request $request): DetailOptions {
+        $filters = $this->getFiltersFromRequest($request);
+
         $options = new DetailOptions();
         $options->setIdentifier($request->attributes->getInt('id'));
 
         /** @var DwhUser $user */
         $user = $this->getUser();
         $options->setTenant($user->getUuid());
+        $options->setFilters($filters);
 
         return $options;
     }
