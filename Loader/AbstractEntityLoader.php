@@ -118,7 +118,11 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
         }
 
         $mapping = $this->getEntityMapping();
-        $mapped = $this->mapEntity($result, $mapping);
+
+        $usedFilterTuples = $this->getAllowedFilters($detailOptions->getFilters());
+        $requestFilters = array_map(function ($tuple) { return $tuple[0]; }, $usedFilterTuples);
+
+        $mapped = $this->mapEntity($result, $mapping, $requestFilters);
 
         return new ProtocolResponse(['protocol' => $this->protocolVersion], $mapped);
     }

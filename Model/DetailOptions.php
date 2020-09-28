@@ -12,6 +12,9 @@ class DetailOptions extends BaseOptions
     /** @var string */
     private $identifier;
 
+    /** @var RequestFilter[] */
+    private $filters;
+
     /**
      * @return string
      */
@@ -26,5 +29,21 @@ class DetailOptions extends BaseOptions
     public function setIdentifier(string $identifier): void
     {
         $this->identifier = $identifier;
+    }
+
+    /**
+     * @return RequestFilter[]
+     */
+    public function getFilters(): array
+    {
+        return $this->filters;
+    }
+
+    /**
+     * @param RequestFilter[] $filters
+     */
+    public function setFilters(array $filters): void
+    {
+        $this->filters = $filters;
     }
 }

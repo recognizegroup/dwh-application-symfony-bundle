@@ -57,7 +57,7 @@ class DocumentationService
             $this->addArraySchema($pluralName, $singularSchemaPath, $components);
 
             $paths[sprintf('/%s', $type)] = $this->createListPathItem($type, $pluralSchemaPath, $loader->getFilters());
-            $paths[sprintf('/%s/{id}', $type)] = $this->createDetailPathItem($type, $singularSchemaPath);
+            $paths[sprintf('/%s/{id}', $type)] = $this->createDetailPathItem($type, $singularSchemaPath, $loader->getFilters());
         }
 
         $document = new OASv3\Document(
@@ -99,10 +99,7 @@ class DocumentationService
             ),
         ];
 
-        /** @var Filter $filter */
-        foreach ($filters as $filter) {
-            $parameters = array_merge($parameters, $this->createParametersForFilter($filter));
-        }
+        $parameters = $this->mergeFilterParametersIntoSchema($parameters, $filters);
 
         $operation = new OASv3\Operation(
             [
@@ -121,11 +118,40 @@ class DocumentationService
     }
 
     /**
+     * @param array $baseParameters
+     * @param array $filters
+     * @param bool $softFiltersOnly
+     * @return array
+     */
+    private function mergeFilterParametersIntoSchema(array $baseParameters = [], array $filters = [], bool $softFiltersOnly = false): array {
+        /** @var Filter $filter */
+        foreach ($filters as $filter) {
+            if (!$softFiltersOnly || $filter->getField() === null) {
+                $baseParameters = array_merge($baseParameters, $this->createParametersForFilter($filter));
+            }
+        }
+
+        return $baseParameters;
+    }
+
+    /**
      * @param string $type
      * @param string $schemaPath
+     * @param array $filters
      * @return OASv3\PathItem
      */
-    private function createDetailPathItem(string $type, string $schemaPath): OASv3\PathItem {
+    private function createDetailPathItem(string $type, string $schemaPath, array $filters = []): OASv3\PathItem {
+        $parameters = [
+            new OASv3\Parameter(
+                'id',
+                'path',
+                null,
+                ['required' => true, 'schema' => new OASv3\Schema(['type' => 'integer'])]
+            ),
+        ];
+
+        $parameters = $this->mergeFilterParametersIntoSchema($parameters, $filters, true);
+
         $operation = new OASv3\Operation(
             [
                 '200' => $this->createResponse(sprintf('Detail of %s', $type), $schemaPath),
@@ -133,14 +159,7 @@ class DocumentationService
             null,
             null,
             [
-                'parameters' => [
-                    new OASv3\Parameter(
-                        'id',
-                        'path',
-                        null,
-                        ['required' => true, 'schema' => new OASv3\Schema(['type' => 'integer'])]
-                    ),
-                ],
+                'parameters' => $parameters,
             ]
         );
 
