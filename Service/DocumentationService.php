@@ -2,6 +2,7 @@
 
 namespace Recognize\DwhApplication\Service;
 
+use AppBundle\Entity\Region;
 use erasys\OpenApi\Spec\v3 as OASv3;
 use Recognize\DwhApplication\Loader\EntityLoaderInterface;
 use Recognize\DwhApplication\Model\Filter;
@@ -230,17 +231,18 @@ class DocumentationService
 
                     $entryMapping = $field->getEntryMapping();
 
+                    $newName = $schemaName;
                     $fieldOnly = true;
                     if ($entryMapping instanceof EntityMapping) {
                         $fieldOnly = false;
-                        $this->addSchema($schemaName, $entryMapping, $components);
+                        $newName = $this->addSchema($schemaName, $entryMapping, $components);
                     }
 
                     $schemaItem = $fieldOnly
                         ?
                         $this->createField($entryMapping->getArrayType() ?? $entryMapping->getType())
                         :
-                        new OASv3\Reference($this->createSchemaPath($schemaName))
+                        new OASv3\Reference($this->createSchemaPath($newName))
                     ;
 
                     if ($type === FieldMapping::TYPE_ARRAY) {
@@ -254,7 +256,23 @@ class DocumentationService
             }
         }
 
+        if (isset($components[$name])) {
+            $appendix = 2;
+
+            while (true) {
+                $name = $name.'_'.$appendix;
+
+                if (!isset($components[$name])) {
+                    break;
+                }
+
+                $appendix++;
+            }
+        }
+
         $components[$name] = new OASv3\Schema(['properties' => $properties]);
+
+        return $name;
     }
 
     /**
