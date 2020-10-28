@@ -51,10 +51,11 @@ class DocumentationService
         foreach ($entityTypes as $type => $loader) {
             [$pluralName, $singularName] = NameHelper::splitPluralName(NameHelper::dashToCamel($type));
 
-            $pluralSchemaPath = $this->createSchemaPath($pluralName);
-            $singularSchemaPath = $this->createSchemaPath($singularName);
+            $newName = $this->addSchema($singularName, $loader->getEntityMapping(), $components);
 
-            $this->addSchema($singularName, $loader->getEntityMapping(), $components);
+            $pluralSchemaPath = $this->createSchemaPath($pluralName);
+            $singularSchemaPath = $this->createSchemaPath($newName);
+
             $this->addArraySchema($pluralName, $singularSchemaPath, $components);
 
             $paths[sprintf('/%s', $type)] = $this->createListPathItem($type, $pluralSchemaPath, $loader->getFilters());
@@ -256,6 +257,7 @@ class DocumentationService
             }
         }
 
+        // try to find a name that has not been used yet
         if (isset($components[$name])) {
             $appendix = 2;
 
