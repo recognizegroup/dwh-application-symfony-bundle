@@ -1,6 +1,7 @@
 {
     "name": "recognize/dwh-application-symfony-bundle",
-    "description": "An IPA connector",
+    "description": "An API connector",
+    "license": "LGPL-3.0-only",
     "authors": [
         {
             "name": "Falco IJben",
