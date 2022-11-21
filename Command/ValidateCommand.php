@@ -55,7 +55,7 @@ class ValidateCommand extends Command
 
             return 0;
         } else {
-            $io->error(sprintf('The entity mapping does not match the current data model: %s* %s', PHP_EOL, implode($errors, PHP_EOL.'* ')));
+            $io->error(sprintf('The entity mapping does not match the current data model: %s* %s', PHP_EOL, implode(PHP_EOL.'* ', $errors)));
 
             return 1;
         }
