@@ -37,12 +37,11 @@ abstract class AbstractDwhApiController extends AbstractController
     private $entityTypes = [];
 
     /**
-     * @Route("/{type}")
-     *
      * @param Request $request
      * @param string $type
      * @return Response
      */
+    #[Route("/{type}")]
     public function listAction(Request $request, string $type) {
         $this->checkEntityType($type);
 
