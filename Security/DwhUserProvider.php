@@ -15,7 +15,7 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 class DwhUserProvider implements UserProviderInterface
 {
     /** @var string */
-    private $encryptedToken;
+    private string $encryptedToken;
 
     /**
      * DwhUserProvider constructor.
@@ -28,9 +28,9 @@ class DwhUserProvider implements UserProviderInterface
 
     /**
      * @param string $username
-     * @return DwhUser|UserInterface
+     * @return UserInterface
      */
-    public function loadUserByUsername($username)
+    public function loadUserByUsername(string $username): UserInterface
     {
         $user = new DwhUser();
         $user->setUsername($username);
@@ -53,8 +53,17 @@ class DwhUserProvider implements UserProviderInterface
      * @param string $class
      * @return bool
      */
-    public function supportsClass($class)
+    public function supportsClass(string $class): bool
     {
         return DwhUser::class === $class;
+    }
+
+    /**
+     * @param string $identifier
+     * @return UserInterface
+     */
+    public function loadUserByIdentifier(string $identifier): UserInterface
+    {
+        return $this->loadUserByUsername($identifier);
     }
 }

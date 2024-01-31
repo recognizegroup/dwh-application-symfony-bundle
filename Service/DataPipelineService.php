@@ -13,10 +13,10 @@ class DataPipelineService
 {
     /**
      * @param mixed $input
-     * @param array|DataTransformationInterface $transformations
+     * @param DataTransformationInterface[] $transformations
      * @return mixed
      */
-    public function apply($input, array $transformations) {
+    public function apply(mixed $input, array $transformations) {
         $output = $input;
 
         /** @var DataTransformationInterface $transformation */

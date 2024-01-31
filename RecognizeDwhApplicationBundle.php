@@ -27,7 +27,7 @@ class RecognizeDwhApplicationBundle extends Bundle
     /**
      * @return DwhApplicationExtension|ExtensionInterface|null
      */
-    public function getContainerExtension()
+    public function getContainerExtension(): ?ExtensionInterface
     {
         return new DwhApplicationExtension();
     }

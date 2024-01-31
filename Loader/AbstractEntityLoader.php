@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\Persistence\ObjectManager;
 use LogicException;
 use Recognize\DwhApplication\Model\BaseOptions;
 use Recognize\DwhApplication\Model\DetailOptions;
@@ -40,7 +41,7 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
 
     private const ENTITY_ALIAS = 'entity';
 
-    /** @var EntityManagerInterface */
+    /** @var ObjectManager */
     protected $entityManager;
 
     /** @var PropertyAccessor */
@@ -289,7 +290,7 @@ abstract class AbstractEntityLoader implements EntityLoaderInterface
                 }
 
                 if ($arrayType !== null) {
-                    $output = $value ?? [];
+                    $output = $value;
 
                     goto doOutput;
                 }

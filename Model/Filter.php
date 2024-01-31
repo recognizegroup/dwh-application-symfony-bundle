@@ -25,7 +25,7 @@ class Filter
     /** @var string[] */
     private $operators = [];
 
-    /** @var string */
+    /** @var string|null */
     private $queryParameter;
 
     /** @var string|null */
@@ -57,9 +57,9 @@ class Filter
     }
 
     /**
-     * @return string
+     * @return string | null
      */
-    public function getQueryParameter(): string
+    public function getQueryParameter(): ?string
     {
         return $this->queryParameter ?? $this->field;
     }
