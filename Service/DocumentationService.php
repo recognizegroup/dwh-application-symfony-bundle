@@ -2,7 +2,6 @@
 
 namespace Recognize\DwhApplication\Service;
 
-use AppBundle\Entity\Region;
 use erasys\OpenApi\Spec\v3 as OASv3;
 use Recognize\DwhApplication\Loader\EntityLoaderInterface;
 use Recognize\DwhApplication\Model\Filter;
@@ -337,7 +336,7 @@ class DocumentationService
                 $name,
                 'query',
                 $description,
-                ['schema' => $this->createField($filter->getType()), 'required' => $filter->isRequired() ?? false]
+                ['schema' => $this->createField($filter->getType()), 'required' => $filter->isRequired()]
             );
         }
 
@@ -349,6 +348,6 @@ class DocumentationService
      * @return string
      */
     private function createSchemaPath(string $name): string {
-        return sprintf('#/components/schemas/%s', $name);;
+        return sprintf('#/components/schemas/%s', $name);
     }
 }

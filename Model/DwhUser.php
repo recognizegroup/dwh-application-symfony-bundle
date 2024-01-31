@@ -20,7 +20,7 @@ class DwhUser implements UserInterface
     /**
      * @return array
      */
-    public function getRoles()
+    public function getRoles(): array
     {
         return [Role::ROLE_DWH_BRIDGE];
     }
@@ -76,5 +76,10 @@ class DwhUser implements UserInterface
     public function eraseCredentials()
     {
         return;
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->username;
     }
 }
