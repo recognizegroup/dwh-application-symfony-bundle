@@ -2,6 +2,7 @@
 namespace Recognize\DwhApplication\Model;
 
 use Recognize\DwhApplication\Security\Role;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -9,7 +10,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @package ${NAMESPACE}
  * @author Bart Wesselink <b.wesselink@recognize.nl>
  */
-class DwhUser implements UserInterface
+class DwhUser implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /** @var string */
     private $username;
@@ -26,9 +27,9 @@ class DwhUser implements UserInterface
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getPassword()
+    public function getPassword(): ?string
     {
         return $this->password;
     }

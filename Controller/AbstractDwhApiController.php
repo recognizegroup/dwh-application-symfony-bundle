@@ -54,12 +54,11 @@ abstract class AbstractDwhApiController extends AbstractController
     }
 
     /**
-     * @Route("/{type}/{id}")
-     *
      * @param Request $request
      * @param string $type
      * @return Response
      */
+    #[Route("/{type}/{id}")]
     public function detailAction(Request $request, string $type) {
         $this->checkEntityType($type);
 
@@ -72,12 +71,11 @@ abstract class AbstractDwhApiController extends AbstractController
     }
 
     /**
-     * @Route("", name="recognize_dwh_definition")
-     *
      * @param Request $request
      * @param DocumentationService $documentationService
      * @return Response
      */
+    #[Route("", name: "recognize_dwh_definition")]
     public function definitionAction(Request $request, DocumentationService $documentationService) {
         $documentation = $documentationService->generate($this->entityTypes);
 
